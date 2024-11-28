@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duolingo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .screen.active {
+            display: flex;
+        }
+        .screen h1 {
+            margin-bottom: 20px;
+        }
+        .screen button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #58cc03;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .screen button:hover {
+            background-color: #58cc03;
+        }
+        .duolingo-font{
+            font-family: "Feather Bold";
+        }
+        .duoling-color{
+            color: #58cc03
+        }
+        .birthday-font {
+            background: linear-gradient(90deg, red, orange, green, blue, indigo, violet);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow 3s infinite linear;
+        }
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .remove-margin-bottom {
+            margin-bottom: 0;
+        }
+        .progress-container {
+            width: 80%;
+            max-width: 500px;
+            background-color: #ddd;
+            border-radius: 25px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 30px;
+            width: 0;
+            background-color: #58cc03;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            font-weight: bold;
+            transition: width 0.3s ease;
+        }
+        canvas{display:block}
+        .happy {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-family: "Source Sans Pro";
+            font-size: 5em;
+            font-weight: 900;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        .button-group {
+            display: inline-flex;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .button-group .button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #0056b3;
+            background-color: #ffffff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .button-group .button:not(:last-child) {
+            border-right: 1px solid #ccc;
+        }
+        .button-group .button i {
+            margin-right: 5px;
+        }
+        textarea {
+            width: 400px;
+            height: 150px;
+            background-color: #dedede; /* Grey background */
+            border: 1px solid #dedede; /* Optional border */
+            border-radius: 15px; /* Rounded corners */
+            padding: 10px;
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+            color: #333; /* Text color */
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* Inner shadow */
+            resize: none; /* Prevent resizing (optional) */
+        }
+        .fill-in-gap {
+            background-color: #dedede; /* Grey background */
+            border: 1px solid #dedede; /* Optional border */
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            outline: none;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Tres columnas */
+            gap: 10px; /* Espaciado entre botones */
+        }
+    </style>
+</head>
+<body>
+    <link href="https://db.onlinewebfonts.com/c/14936bb7a4b6575fd2eee80a3ab52cc2?family=Feather+Bold" rel="stylesheet">
+    <div class="container">
+        <div class="screen active" id="screen1">
+            <h1 class="duoling-color"     style="margin-bottom: 0px;">duolingo</h1>
+            <h4 class="birthday-font">Birthday edition</h1>
+            <video width="320" height="240" autoplay muted>
+                <source src="assets/intro.mov" type="video/mp4">
+              </video>
+            <button style="margin-top: 10px;" onclick="nextScreen(1)">Let's begin</button>
+        </div>
+        <div class="screen" id="screen2">
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+            </div>
+            <h3>Escucha y escribe</h3>
+            <div class="button-group">
+                <a href="#" class="button" id="playButton">
+                    <img src="assets/svg/audio.svg" width="25" height="50">
+                </a>
+                <a href="#" class="button">
+                    <img src="assets/svg/turtle.svg" id="playButtonSlow" width="25" height="50">
+                </a>
+            </div>
+            <br>
+            <textarea id="myTextarea"></textarea>
+            <img src="assets/asset1.jpg" width="100" height="200">
+
+            <button id="checkButton">Continuar</button>
+        </div>
+        <div class="screen" id="screen3">
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 25%;"></div>
+            </div>
+            <h3>Escucha y escribe</h3>
+            <div class="button-group">
+                <a href="#" class="button" id="Olga">
+                    <img src="assets/svg/audio.svg" width="25" height="50">
+                </a>
+                <a href="#" class="button">
+                    <img src="assets/svg/turtle.svg" id="OlgaSlow" width="25" height="50">
+                </a>
+            </div>
+            <br>
+            <div class="exercise">
+                <input type="text" class="gap fill-in-gap" id="olga" placeholder="Type here"> is our best friend.
+            </div>
+            <img src="assets/asset2.png" width="300" height="200">
+            <button id="checkButtonOlga" >Continuar</button>
+        </div>
+        <div class="screen" id="screen4">
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 50%;"></div>
+            </div>
+            <h3>Rellena la frase</h3>
+            <div id="pederast">
+                Roberto is a ________________.
+            </div>
+            <div class="button-grid" style="margin-top: 10px;">
+                <!-- Primera fila -->
+                <button class="button" onclick="addOption()">pederast</button>
+                <button class="button"  onclick="addOption()">pederast</button>
+                <button class="button"  onclick="addOption()">pederast</button>
+                <!-- Segunda fila -->
+                <button class="button"  onclick="addOption()">pederast</button>
+                <button class="button"  onclick="addOption()">pederast</button>
+                <button class="button"  onclick="addOption()">pederast</button>
+            </div>
+            <img src="assets/asset2.webp" width="150" height="200">
+        </div>
+        <div class="screen" id="screen5">
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar" style="width: 75%;"></div>
+            </div>
+            <h3>Traduce la frase</h3>
+            <label>The American has a hump</label>
+            <textarea id="translate" style="margin-bottom: 10px;"></textarea>
+            <button id="checkButtonFinal">Continuar</button>
+        </div>
+        <div class="screen" id="screen6">
+            <h1 class="happy">Happy Birthday</h1>
+            <canvas id="birthday"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let progress = 0;
+        function nextScreen(current) {
+            document.getElementById(`screen${current}`).classList.remove('active');
+            const next = current + 1;
+            document.getElementById(`screen${next}`).classList.add('active');
+        }
+
+        function restart() {
+            document.getElementById('screen5').classList.remove('active');
+            document.getElementById('screen1').classList.add('active');
+        }
+
+        function addOption() {
+            const textDiv = document.getElementById('pederast');
+            // Set new text content
+            textDiv.innerHTML = "Roberto is a <b>pederast</b>";
+            const audio = new Audio('assets/audio/correct.mp3'); 
+            audio.play();
+            nextScreen(4)
+        }
+
+        // Create an Audio object
+        const audio = new Audio('assets/audio/first.mp3'); 
+
+        // Add click event listener to the button
+        document.getElementById('playButton').addEventListener('click', () => {
+            audio.play();
+        });
+
+
+        document.getElementById('playButtonSlow').addEventListener('click', () => {
+            audio.playbackRate = 0.5;
+            audio.play();
+        });
+
+        document.getElementById('Olga').addEventListener('click', () => {
+            const audio = new Audio('assets/audio/olga.mp3'); 
+            audio.play();
+        });
+
+        document.getElementById('OlgaSlow').addEventListener('click', () => {
+            const audio = new Audio('assets/audio/olga.mp3'); 
+            audio.play();
+        });
+
+        // helper functions
+const PI2 = Math.PI * 2
+const random = (min, max) => Math.random() * (max - min + 1) + min | 0
+const timestamp = _ => new Date().getTime()
+
+// container
+class Birthday {
+  constructor() {
+    this.resize()
+
+    // create a lovely place to store the firework
+    this.fireworks = []
+    this.counter = 0
+
+  }
+  
+  resize() {
+    this.width = canvas.width = window.innerWidth
+    let center = this.width / 2 | 0
+    this.spawnA = center - center / 4 | 0
+    this.spawnB = center + center / 4 | 0
+    
+    this.height = canvas.height = window.innerHeight
+    this.spawnC = this.height * .1
+    this.spawnD = this.height * .5
+    
+  }
+  
+  onClick(evt) {
+     let x = evt.clientX || evt.touches && evt.touches[0].pageX
+     let y = evt.clientY || evt.touches && evt.touches[0].pageY
+     
+     let count = random(3,5)
+     for(let i = 0; i < count; i++) this.fireworks.push(new Firework(
+        random(this.spawnA, this.spawnB),
+        this.height,
+        x,
+        y,
+        random(0, 260),
+        random(30, 110)))
+          
+     this.counter = -1
+     
+  }
+  
+  update(delta) {
+    ctx.globalCompositeOperation = 'hard-light'
+    ctx.fillStyle = `rgba(20,20,20,${ 7 * delta })`
+    ctx.fillRect(0, 0, this.width, this.height)
+
+    ctx.globalCompositeOperation = 'lighter'
+    for (let firework of this.fireworks) firework.update(delta)
+
+    // if enough time passed... create new new firework
+    this.counter += delta * 3 // each second
+    if (this.counter >= 1) {
+      this.fireworks.push(new Firework(
+        random(this.spawnA, this.spawnB),
+        this.height,
+        random(0, this.width),
+        random(this.spawnC, this.spawnD),
+        random(0, 360),
+        random(30, 110)))
+      this.counter = 0
+    }
+
+    // remove the dead fireworks
+    if (this.fireworks.length > 1000) this.fireworks = this.fireworks.filter(firework => !firework.dead)
+
+  }
+}
+
+class Firework {
+  constructor(x, y, targetX, targetY, shade, offsprings) {
+    this.dead = false
+    this.offsprings = offsprings
+
+    this.x = x
+    this.y = y
+    this.targetX = targetX
+    this.targetY = targetY
+
+    this.shade = shade
+    this.history = []
+  }
+  update(delta) {
+    if (this.dead) return
+
+    let xDiff = this.targetX - this.x
+    let yDiff = this.targetY - this.y
+    if (Math.abs(xDiff) > 3 || Math.abs(yDiff) > 3) { // is still moving
+      this.x += xDiff * 2 * delta
+      this.y += yDiff * 2 * delta
+
+      this.history.push({
+        x: this.x,
+        y: this.y
+      })
+
+      if (this.history.length > 20) this.history.shift()
+
+    } else {
+      if (this.offsprings && !this.madeChilds) {
+        
+        let babies = this.offsprings / 2
+        for (let i = 0; i < babies; i++) {
+          let targetX = this.x + this.offsprings * Math.cos(PI2 * i / babies) | 0
+          let targetY = this.y + this.offsprings * Math.sin(PI2 * i / babies) | 0
+
+          birthday.fireworks.push(new Firework(this.x, this.y, targetX, targetY, this.shade, 0))
+
+        }
+
+      }
+      this.madeChilds = true
+      this.history.shift()
+    }
+    
+    if (this.history.length === 0) this.dead = true
+    else if (this.offsprings) { 
+        for (let i = 0; this.history.length > i; i++) {
+          let point = this.history[i]
+          ctx.beginPath()
+          ctx.fillStyle = 'hsl(' + this.shade + ',100%,' + i + '%)'
+          ctx.arc(point.x, point.y, 1, 0, PI2, false)
+          ctx.fill()
+        } 
+      } else {
+      ctx.beginPath()
+      ctx.fillStyle = 'hsl(' + this.shade + ',100%,50%)'
+      ctx.arc(this.x, this.y, 1, 0, PI2, false)
+      ctx.fill()
+    }
+
+  }
+}
+
+let canvas = document.getElementById('birthday')
+let ctx = canvas.getContext('2d')
+
+let then = timestamp()
+
+let birthday = new Birthday
+window.onresize = () => birthday.resize()
+document.onclick = evt => birthday.onClick(evt)
+document.ontouchstart = evt => birthday.onClick(evt)
+
+  ;(function loop(){
+  	requestAnimationFrame(loop)
+
+  	let now = timestamp()
+  	let delta = now - then
+
+    then = now
+    birthday.update(delta / 1000)
+  	
+
+  })()
+
+  document.getElementById('checkButton').addEventListener('click', () => {
+            
+            // Get the value of the textarea
+            const text = document.getElementById('myTextarea').value;
+
+            // Perform a check (for example, check if the text is empty)
+            if (text.toLowerCase().trim() === "the mango woman is very ugly") {
+                const audio = new Audio('assets/audio/correct.mp3');
+                audio.play();
+                nextScreen(2);
+
+            } else {
+                const audio = new Audio('assets/audio/error.mp3');
+                audio.play();
+            }
+        });
+
+        document.getElementById('checkButtonOlga').addEventListener('click', () => {
+            
+            // Get the value of the textarea
+            const text = document.getElementById('olga').value;
+
+            // Perform a check (for example, check if the text is empty)
+            if (text.toLowerCase().trim() === "olga") {
+                const audio = new Audio('assets/audio/correct.mp3');
+                audio.play();
+                nextScreen(3);
+
+            } else {
+                const audio = new Audio('assets/audio/error.mp3');
+                audio.play();
+            }
+        });
+
+        document.getElementById('checkButtonFinal').addEventListener('click', () => {
+            
+            // Get the value of the textarea
+            const text = document.getElementById('translate').value;
+
+            // Perform a check (for example, check if the text is empty)
+            if (text.toLowerCase().trim() === "la americana tiene chepa") {
+                const audio = new Audio('assets/audio/correct.mp3');
+                audio.play();
+                const audioH = new Audio('assets/audio/usa.mp3');
+                audioH.play();
+                nextScreen(5);
+
+            } else {
+                const audio = new Audio('assets/audio/error.mp3');
+                audio.play();
+            }
+        });
+        
+
+
+        
+    </script>
+</body>
+</html>
